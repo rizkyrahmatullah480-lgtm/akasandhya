@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="400" height="360">
+    <rect width="100%" height="100%" fill="#FFFFFF" />
+    
+      <rect x="50" y="50" width="300" height="260" fill="none" stroke="#E5E7EB" stroke-width="1.5" />
+      <line x1="180" y1="130" x2="220" y2="130" stroke="#1F2937" stroke-width="2" />
+      <text x="200" y="90" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="middle" letter-spacing="4">SAVE THE DATE</text>
+    
+    <g text-anchor="middle">
+      <text x="200" y="150" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#9CA3AF" letter-spacing="2">P E R N I K A H A N</text>
+      <text x="200" y="205" font-family="Inter, sans-serif" font-size="24" font-weight="bold" fill="#1F2937">ANDI + CLARA</text>
+      <text x="200" y="235" font-family="Inter, sans-serif" font-size="11" fill="#1F2937" opacity="0.75" letter-spacing="1">JAKARTA • 2026</text>
+    </g>
+  </svg>

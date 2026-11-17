@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="400" height="360">
+    <rect width="100%" height="100%" fill="#58111A" />
+    
+      <rect x="30" y="30" width="340" height="300" fill="none" stroke="#E5C158" stroke-width="2" />
+      <rect x="36" y="36" width="328" height="288" fill="none" stroke="#E5C158" stroke-width="0.8" />
+      <!-- Crest Top -->
+      <polygon points="200,45 210,60 190,60" fill="#E5C158" />
+      <circle cx="200" cy="75" r="4" fill="#E5C158" />
+      <path d="M 170 75 Q 200 65 230 75" fill="none" stroke="#E5C158" stroke-width="1" />
+    
+    <g text-anchor="middle">
+      <text x="200" y="150" font-family="Cormorant Garamond, serif" font-size="11" font-weight="600" fill="#E5C158" letter-spacing="2">Walimatul Ursy</text>
+      <text x="200" y="205" font-family="Cormorant Garamond, serif" font-size="24" font-weight="bold" fill="#FFFFFF">Dimas & Anisa</text>
+      <text x="200" y="235" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" opacity="0.75" letter-spacing="1">22 Agustus 2026</text>
+    </g>
+  </svg>

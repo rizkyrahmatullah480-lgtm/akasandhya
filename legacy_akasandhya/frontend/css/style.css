@@ -1,0 +1,105 @@
+.glass-panel {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(100, 149, 237, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.ocean-bg {
+    background: radial-gradient(circle at 50% 100%, #144272 0%, #0c2445 40%, #0f172a 100%);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* Water wave dynamic animation */
+.ocean-bg::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background-image: radial-gradient(circle at center, rgba(100, 149, 237, 0.08) 0%, transparent 60%);
+    animation: waveRotate 25s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes waveRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 1.2s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+/* Particle Effects (Blue Light Particles) */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(135,206,250,1) 0%, rgba(100,149,237,0.5) 40%, transparent 100%);
+    animation: floatUp 15s infinite linear;
+    opacity: 0;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
+}
+
+/* Custom Scrollbar to match the ocean aesthetic */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a; 
+}
+::-webkit-scrollbar-thumb {
+    background: #2c74b3; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #6495ed; 
+}
+
+/* Timeline Custom Styles */
+.timeline-dot {
+    position: relative;
+}
+.timeline-dot::before {
+    content: '';
+    position: absolute;
+    left: -1.75rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    background-color: #6495ed;
+    border-radius: 50%;
+    border: 3px solid #0f172a;
+    box-shadow: 0 0 10px rgba(100,149,237,0.5);
+}
+
+.timeline-border {
+    border-left: 2px solid rgba(100, 149, 237, 0.3);
+    padding-left: 1.5rem;
+}

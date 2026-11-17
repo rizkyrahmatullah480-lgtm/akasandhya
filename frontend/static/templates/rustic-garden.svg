@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="400" height="360">
+    <rect width="100%" height="100%" fill="#F7F8F5" />
+    
+      <!-- Kraft Box & Eucalyptus -->
+      <rect x="60" y="50" width="280" height="260" rx="16" fill="#FFFFFF" stroke="#D1BC9E" stroke-width="1.5" />
+      <path d="M 70 80 Q 90 50 130 65" fill="none" stroke="#7A8F7E" stroke-width="2" />
+      <ellipse cx="85" cy="62" rx="8" ry="4" transform="rotate(-30 85 62)" fill="#7A8F7E" />
+      <ellipse cx="115" cy="58" rx="8" ry="4" transform="rotate(20 115 58)" fill="#4A5D4E" />
+      <path d="M 330 280 Q 310 310 270 295" fill="none" stroke="#7A8F7E" stroke-width="2" />
+      <ellipse cx="315" cy="298" rx="8" ry="4" transform="rotate(-30 315 298)" fill="#7A8F7E" />
+      <ellipse cx="285" cy="302" rx="8" ry="4" transform="rotate(20 285 302)" fill="#4A5D4E" />
+    
+    <g text-anchor="middle">
+      <text x="200" y="150" font-family="Cormorant Garamond, serif" font-size="11" font-weight="600" fill="#D1BC9E" letter-spacing="2">Lamaran & Pertunangan</text>
+      <text x="200" y="205" font-family="Cormorant Garamond, serif" font-size="24" font-weight="bold" fill="#4A5D4E">Bayu & Nadia</text>
+      <text x="200" y="235" font-family="Inter, sans-serif" font-size="11" fill="#4A5D4E" opacity="0.75" letter-spacing="1">Taman Suropati • 2026</text>
+    </g>
+  </svg>

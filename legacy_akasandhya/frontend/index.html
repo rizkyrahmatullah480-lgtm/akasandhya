@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Akhirusannah - Angkatan Akasandhya</title>
+    
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&family=Amiri:ital@0;1&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ocean: {
+                            900: '#0f172a',
+                            800: '#0c2445',
+                            700: '#144272',
+                            600: '#205295',
+                            500: '#2c74b3',
+                            400: '#6495ed',
+                            300: '#87cefa',
+                            100: '#e0f2fe'
+                        },
+                        gold: '#d4af37'
+                    },
+                    fontFamily: {
+                        playfair: ['"Playfair Display"', 'serif'],
+                        poppins: ['"Poppins"', 'sans-serif'],
+                        amiri: ['"Amiri"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-ocean-900 text-slate-100 font-poppins overflow-hidden selection:bg-gold selection:text-ocean-900">
+    
+    <!-- Particles Container for Blue Light Effects -->
+    <div id="particles-container" class="particle-container"></div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Floating Audio Control -->
+    <button id="musicToggle" class="fixed bottom-6 right-6 z-50 bg-gold/90 p-4 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.5)] text-ocean-900 backdrop-blur-md hidden hover:scale-110 transition-transform">
+        <i class="fas fa-music"></i>
+    </button>
+
+    <!-- ================= OPENING SCREEN ================= -->
+    <div id="opening" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-ocean-900 transition-transform duration-1000 ease-in-out">
+        <div class="absolute inset-0 ocean-bg opacity-50"></div>
+        
+        <div class="z-10 text-center px-4 w-full max-w-md">
+            <h3 class="text-gold tracking-[0.2em] text-sm uppercase mb-4 animate-fade-in-up">Undangan Akhirusannah</h3>
+            <h1 class="font-playfair text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-ocean-300 via-white to-ocean-100 drop-shadow-md">Akasandhya</h1>
+            
+            <!-- Guest Card Info -->
+            <div class="glass-panel p-6 rounded-2xl mx-auto mb-10 animate-fade-in-up" style="animation-delay: 0.3s">
+                <p class="text-ocean-300 text-xs tracking-widest uppercase mb-3">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+                <h2 id="guestNameDisplay" class="font-playfair text-3xl font-bold text-white mb-3 tracking-wide">Tamu Kehormatan</h2>
+                <p class="text-[10px] text-ocean-400 italic font-light">*Mohon maaf bila ada kesalahan penulisan nama/gelar</p>
+            </div>
+
+            <button id="btnOpen" class="bg-gradient-to-r from-ocean-600 to-ocean-500 hover:from-ocean-500 hover:to-ocean-400 text-white px-8 py-3 rounded-full font-semibold shadow-[0_0_20px_rgba(44,116,179,0.6)] transition-all transform hover:scale-105 flex items-center justify-center mx-auto gap-3 border border-ocean-400/30">
+                <i class="fas fa-envelope-open-text"></i> Buka Undangan
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main id="mainContent" class="h-screen overflow-y-auto hidden pb-20 relative">
+        
+        <!-- Hero Section -->
+        <section class="min-h-[100vh] relative flex flex-col items-center justify-center pt-10 px-4 text-center">
+            <div class="absolute inset-0 ocean-bg opacity-30"></div>
+            
+            <div class="z-10 animate-fade-in-up flex flex-col items-center w-full max-w-4xl">
+                <!-- Bismillah / Islamic Caligraphy (Placeholder image) -->
+                <p class="font-amiri text-3xl md:text-4xl text-gold mb-6 drop-shadow-md">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+                
+                <h3 class="text-ocean-300 tracking-[0.3em] text-xs md:text-sm uppercase mb-4 font-semibold">Tasyakuran & Akhirusannah</h3>
+                <h1 class="font-playfair text-6xl md:text-8xl font-bold mb-6 text-white drop-shadow-[0_0_25px_rgba(100,149,237,0.5)]">Akasandhya</h1>
+                
+                <p class="text-slate-300 text-base md:text-lg font-light mb-12 italic max-w-2xl">
+                    "Berlabuh untuk melangkah, menerjang ombak menggapai ridha-Nya. Menyambung tali silaturahmi dalam keberkahan."
+                </p>
+                
+                <!-- Countdown -->
+                <div class="glass-panel p-6 rounded-3xl inline-flex flex-wrap justify-center gap-4 md:gap-8 mb-12 shadow-[0_15px_30px_rgba(0,0,0,0.5)] border-t border-ocean-400/20">
+                    <div class="text-center w-16 md:w-20">
+                        <div id="days" class="font-playfair text-3xl md:text-5xl font-bold text-white drop-shadow-md">00</div>
+                        <div class="text-[10px] md:text-xs uppercase tracking-wider text-ocean-400 mt-1 font-semibold">Hari</div>
+                    </div>
+                    <div class="text-center w-16 md:w-20 border-l border-ocean-700/50">
+                        <div id="hours" class="font-playfair text-3xl md:text-5xl font-bold text-white drop-shadow-md">00</div>
+                        <div class="text-[10px] md:text-xs uppercase tracking-wider text-ocean-400 mt-1 font-semibold">Jam</div>
+                    </div>
+                    <div class="text-center w-16 md:w-20 border-l border-ocean-700/50">
+                        <div id="mins" class="font-playfair text-3xl md:text-5xl font-bold text-white drop-shadow-md">00</div>
+                        <div class="text-[10px] md:text-xs uppercase tracking-wider text-ocean-400 mt-1 font-semibold">Menit</div>
+                    </div>
+                    <div class="text-center w-16 md:w-20 border-l border-ocean-700/50">
+                        <div id="secs" class="font-playfair text-3xl md:text-5xl font-bold text-white drop-shadow-md">00</div>
+                        <div class="text-[10px] md:text-xs uppercase tracking-wider text-ocean-400 mt-1 font-semibold">Detik</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-10 animate-bounce text-ocean-400 opacity-80">
+                <i class="fas fa-chevron-down text-3xl drop-shadow-[0_0_10px_rgba(100,149,237,0.8)]"></i>
+            </div>
+        </section>
+
+        <!-- Acara / Event Details -->
+        <section class="py-24 px-4 relative z-10">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="font-playfair text-4xl md:text-5xl font-bold text-gold drop-shadow-md">Informasi Acara</h2>
+                    <div class="w-24 h-1 bg-ocean-500 mx-auto mt-4 rounded-full opacity-50"></div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                    <!-- Akad / Doa Card -->
+                    <div class="glass-panel p-8 md:p-10 rounded-3xl text-center transform transition duration-500 hover:-translate-y-2 group">
+                        <div class="w-20 h-20 bg-ocean-800/80 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl text-gold border border-ocean-600 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:bg-ocean-700 transition">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="font-playfair text-3xl font-bold mb-4 text-white">Rangkaian Acara</h3>
+                        <p class="text-ocean-100 text-lg mb-2 font-medium">Minggu, 12 Juli 2026</p>
+                        <p class="text-ocean-300 mb-6 flex items-center justify-center gap-2">
+                            <i class="far fa-clock"></i> 08:00 WIB - Selesai
+                        </p>
+                        <div class="bg-ocean-900/50 rounded-xl p-4 text-sm text-slate-300 border border-ocean-800/50 text-left space-y-2">
+                            <div class="flex justify-between border-b border-ocean-700/30 pb-2"><span class="text-ocean-400 font-semibold">08.00</span> <span>Registrasi & Sambutan</span></div>
+                            <div class="flex justify-between border-b border-ocean-700/30 pb-2"><span class="text-ocean-400 font-semibold">09.30</span> <span>Prosesi Akhirusannah</span></div>
+                            <div class="flex justify-between"><span class="text-ocean-400 font-semibold">11.30</span> <span>Doa & Penutup</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Location Card -->
+                    <div class="glass-panel p-8 md:p-10 rounded-3xl text-center transform transition duration-500 hover:-translate-y-2 group">
+                        <div class="w-20 h-20 bg-ocean-800/80 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl text-gold border border-ocean-600 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:bg-ocean-700 transition">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3 class="font-playfair text-3xl font-bold mb-4 text-white">Lokasi Acara</h3>
+                        <p class="text-ocean-100 text-lg mb-1 font-medium">Gedung Serbaguna Samudera</p>
+                        <p class="text-ocean-300 mb-6 text-sm">Jl. Pantai Indah Kapuk No. 123, Jakarta Utara</p>
+                        
+                        <!-- QR Code to Location (Generated by JS) -->
+                        <div class="bg-white p-3 rounded-2xl inline-block mb-6 shadow-lg transform group-hover:scale-105 transition duration-300">
+                            <div id="qrcodeLocation"></div>
+                        </div>
+                        
+                        <div>
+                            <a href="https://maps.google.com" target="_blank" class="inline-block bg-transparent border border-ocean-400 text-ocean-100 px-8 py-3 rounded-full hover:bg-ocean-600 transition-all font-semibold shadow-[0_0_10px_rgba(100,149,237,0.3)]">
+                                <i class="fas fa-map-marked-alt mr-2"></i> Buka Google Maps
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Galeri & Guru Section (Placeholder) -->
+        <section class="py-20 relative z-10 bg-ocean-900/60 border-y border-ocean-800/50">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="font-playfair text-4xl font-bold text-gold drop-shadow-md">Galeri Kenangan</h2>
+                    <p class="text-ocean-300 mt-2">Momen indah yang tak terlupakan</p>
+                </div>
+                
+                <!-- Masonry-like Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="col-span-2 row-span-2 bg-ocean-800 rounded-2xl overflow-hidden shadow-lg border border-ocean-700 group relative">
+                        <div class="absolute inset-0 bg-ocean-900/50 group-hover:bg-transparent transition duration-500 z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Galeri" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                    </div>
+                    <div class="bg-ocean-800 rounded-2xl overflow-hidden shadow-lg border border-ocean-700 group h-48">
+                        <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Galeri" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                    </div>
+                    <div class="bg-ocean-800 rounded-2xl overflow-hidden shadow-lg border border-ocean-700 group h-48">
+                        <img src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Galeri" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                    </div>
+                    <div class="col-span-2 bg-ocean-800 rounded-2xl overflow-hidden shadow-lg border border-ocean-700 group h-48">
+                        <img src="https://images.unsplash.com/photo-1541829070764-84a5d30cb273?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Galeri" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP & Wishes -->
+        <section class="py-24 px-4 relative z-10">
+            <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+                
+                <!-- Form RSVP -->
+                <div>
+                    <h2 class="font-playfair text-4xl font-bold mb-6 text-gold drop-shadow-md">Konfirmasi Kehadiran</h2>
+                    <p class="text-ocean-300 mb-8 font-light leading-relaxed">Merupakan suatu kehormatan bagi kami jika Bapak/Ibu/Saudara/i berkenan hadir. Mohon konfirmasi kehadiran Anda melalui form di bawah ini.</p>
+                    
+                    <form id="rsvpForm" class="glass-panel p-8 rounded-3xl relative overflow-hidden">
+                        <!-- Decorative blur blob -->
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-ocean-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                        
+                        <div class="mb-5 relative z-10">
+                            <label class="block text-sm text-ocean-400 mb-2 font-medium">Nama Lengkap</label>
+                            <input type="text" id="rsvpName" class="w-full bg-ocean-900/60 border border-ocean-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition shadow-inner" required readonly>
+                        </div>
+                        <div class="mb-5 relative z-10">
+                            <label class="block text-sm text-ocean-400 mb-2 font-medium">Kehadiran</label>
+                            <select id="rsvpStatus" class="w-full bg-ocean-900/60 border border-ocean-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition shadow-inner appearance-none" required>
+                                <option value="hadir">Ya, Saya akan hadir</option>
+                                <option value="tidak_hadir">Maaf, saya tidak bisa hadir</option>
+                            </select>
+                        </div>
+                        <div class="mb-8 relative z-10">
+                            <label class="block text-sm text-ocean-400 mb-2 font-medium">Ucapan & Doa</label>
+                            <textarea id="rsvpMessage" rows="4" class="w-full bg-ocean-900/60 border border-ocean-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition shadow-inner resize-none" required placeholder="Tuliskan ucapan dan doa terbaik Anda..."></textarea>
+                        </div>
+                        <button type="submit" class="relative z-10 w-full bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-ocean-900 font-bold py-4 rounded-xl transition shadow-[0_10px_20px_rgba(212,175,55,0.3)] transform hover:-translate-y-1">
+                            <i class="fas fa-paper-plane mr-2"></i> Kirim RSVP & Ucapan
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Live Ucapan -->
+                <div>
+                    <h2 class="font-playfair text-4xl font-bold mb-6 text-gold drop-shadow-md">Buku Tamu Online</h2>
+                    <p class="text-ocean-300 mb-8 font-light">Kumpulan doa dan ucapan dari para tamu undangan.</p>
+                    
+                    <!-- Container Ucapan with Custom Scrollbar -->
+                    <div class="glass-panel p-6 rounded-3xl h-[550px] overflow-y-auto pr-2" id="ucapanList">
+                        <!-- Rendered by JS -->
+                        <div class="text-center py-20">
+                            <i class="fas fa-spinner fa-spin text-3xl text-ocean-400 mb-4"></i>
+                            <p class="text-ocean-300">Memuat ucapan...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 text-center border-t border-ocean-800 bg-ocean-900/80 relative z-10">
+            <p class="font-amiri text-2xl text-ocean-400 mb-2">وَالسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</p>
+            <p class="font-playfair text-2xl text-gold mb-6 mt-4">Akasandhya 2026</p>
+            <div class="flex justify-center gap-4 mb-8">
+                <a href="#" class="w-10 h-10 rounded-full bg-ocean-800 flex items-center justify-center text-ocean-400 hover:bg-ocean-600 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-ocean-800 flex items-center justify-center text-ocean-400 hover:bg-ocean-600 hover:text-white transition"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-ocean-800 flex items-center justify-center text-ocean-400 hover:bg-ocean-600 hover:text-white transition"><i class="fas fa-globe"></i></a>
+            </div>
+            <p class="text-xs text-ocean-500 font-light tracking-wide">Dibuat dengan <i class="fas fa-heart text-red-500 mx-1"></i> untuk Generasi Penerus Bangsa</p>
+        </footer>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

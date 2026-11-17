@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Akasandhya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex shadow-xl z-20">
+            <div class="p-6 border-b border-slate-800">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white font-bold">A</div>
+                    <h2 class="text-xl font-bold text-white tracking-wide">Admin Panel</h2>
+                </div>
+                <p class="text-xs text-slate-400">Akhirusannah Akasandhya</p>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-600 rounded-lg text-white font-medium shadow-md shadow-blue-900/50">
+                    <i class="fas fa-users w-5"></i> Manajemen Tamu
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                    <i class="fas fa-comment-dots w-5"></i> Daftar Ucapan
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                    <i class="fas fa-cog w-5"></i> Pengaturan
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <button class="flex items-center gap-3 px-4 py-2 w-full text-slate-400 hover:text-red-400 transition">
+                    <i class="fas fa-sign-out-alt w-5"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-slate-50">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center sticky top-0 z-10 border-b border-slate-200">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-slate-500 hover:text-slate-700"><i class="fas fa-bars text-xl"></i></button>
+                    <h1 class="text-xl font-semibold text-slate-800">Dashboard Tamu</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        WA Bot Aktif
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" alt="Admin">
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 flex-1 max-w-7xl mx-auto w-full">
+                
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Card 1 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">Total Undangan</p>
+                            <h3 class="text-3xl font-bold text-slate-800" id="statTotal">0</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-2xl">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 2 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">Pesan WA Terkirim</p>
+                            <h3 class="text-3xl font-bold text-green-600" id="statSent">0</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center text-green-500 text-2xl">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 3 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">Konfirmasi Hadir</p>
+                            <h3 class="text-3xl font-bold text-indigo-600" id="statHadir">0</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-2xl">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="font-semibold text-lg text-slate-800">Daftar Tamu Undangan</h2>
+                        <div class="flex gap-3">
+                            <button class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition shadow-sm flex items-center gap-2" onclick="document.getElementById('importModal').classList.remove('hidden')">
+                                <i class="fas fa-file-csv text-green-600"></i> Import CSV
+                            </button>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm shadow-blue-600/30 flex items-center gap-2" onclick="document.getElementById('addModal').classList.remove('hidden')">
+                                <i class="fas fa-plus"></i> Tambah Tamu
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm uppercase tracking-wider">
+                                    <th class="p-4 font-medium pl-6">Nama Lengkap</th>
+                                    <th class="p-4 font-medium">No. WhatsApp</th>
+                                    <th class="p-4 font-medium">Kategori</th>
+                                    <th class="p-4 font-medium">Status Undangan WA</th>
+                                    <th class="p-4 font-medium">RSVP Kehadiran</th>
+                                    <th class="p-4 font-medium text-right pr-6">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="text-sm">
+                                <!-- Data rendered via JS -->
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-slate-400">
+                                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i><br>Memuat data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tambah Tamu -->
+    <div id="addModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-0 w-full max-w-md shadow-2xl overflow-hidden transform scale-100 transition-all">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-semibold text-slate-800">Tambah Tamu Baru</h3>
+                <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="addForm" class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="addNama" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required placeholder="Contoh: Bapak Ahmad">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">No WhatsApp</label>
+                    <input type="text" id="addWa" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required placeholder="Contoh: 08123456789">
+                    <p class="text-xs text-slate-500 mt-1">Nomor ini akan menerima pesan undangan otomatis dari BOT.</p>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
+                    <select id="addKat" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white">
+                        <option value="Tamu VIP">Tamu VIP</option>
+                        <option value="Guru & Staff">Guru & Staff</option>
+                        <option value="Wali Murid">Wali Murid</option>
+                        <option value="Siswa">Siswa</option>
+                        <option value="Umum">Umum</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition" onclick="document.getElementById('addModal').classList.add('hidden')">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-2">
+                        <i class="fas fa-save"></i> Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Import CSV -->
+    <div id="importModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-0 w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-semibold text-slate-800">Import Data via CSV</h3>
+                <button onclick="document.getElementById('importModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="importForm" class="p-6">
+                <div class="mb-6 text-center">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">Pastikan file CSV Anda memiliki header: <b>nama, no_wa, kategori</b></p>
+                    
+                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 hover:bg-slate-50 transition cursor-pointer relative">
+                        <input type="file" id="fileCsv" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                        <i class="fas fa-cloud-upload-alt text-2xl text-slate-400 mb-2"></i>
+                        <p class="text-sm font-medium text-blue-600">Klik untuk memilih file CSV</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition" onclick="document.getElementById('importModal').classList.add('hidden')">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition flex items-center gap-2">
+                        <i class="fas fa-upload"></i> Upload & Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
