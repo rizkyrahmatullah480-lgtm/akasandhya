@@ -53,6 +53,10 @@
     sending = true;
     error = '';
 
+    // Buka tab kosong selagi masih dalam user gesture, supaya popup blocker
+    // tidak menolak window.open setelah await fetch selesai.
+    const pendingWin = mode === 'click' ? window.open('about:blank', '_blank') : null;
+
     try {
       const res = await api.sendWhatsApp(guest.id, { mode });
       currentInvitation = res.data.invitation;
@@ -60,7 +64,19 @@
       if (mode === 'click' && res.data.wa_url) {
         waUrl = res.data.wa_url;
         messagePreview = res.data.message ?? '';
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        let opened = false;
+        try {
+          if (pendingWin && !pendingWin.closed && pendingWin.location) {
+            pendingWin.location.href = waUrl;
+            pendingWin.opener = null;
+            opened = true;
+          }
+        } catch {
+          opened = false;
+        }
+        if (!opened) {
+          window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
         toast.success('WhatsApp dibuka. Tekan kirim, lalu tandai terkirim di panel ini.');
       } else {
         toast.success('Undangan berhasil dikirim melalui WhatsApp Business API.');
@@ -69,6 +85,7 @@
 
       onupdated?.();
     } catch (err: any) {
+      pendingWin?.close();
       error = err.message || 'Gagal mengirim undangan.';
       if (err.payload?.data?.invitation) {
         currentInvitation = err.payload.data.invitation;

@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { api } from '$lib/services/api';
   import { toast } from '$lib/stores/toast';
+  import { readCache, writeCache } from '$lib/utils/cache';
   import type { SantriOverview } from '$lib/types';
   import {
     Users,
@@ -21,17 +22,25 @@
   let data = $state<SantriOverview | null>(null);
   let loading = $state(true);
   let error = $state('');
+  const OVERVIEW_CACHE_KEY = 'santri_overview';
 
   async function load() {
     loading = true;
     error = '';
 
+    // Tampilkan data terakhir dulu, lalu perbarui di belakang.
+    data = readCache<SantriOverview>(OVERVIEW_CACHE_KEY, 10 * 60 * 1000);
+    if (data) loading = false;
+
     try {
       const res = await api.getSantriOverview();
       data = res.data;
+      writeCache(OVERVIEW_CACHE_KEY, res.data);
     } catch (err: any) {
-      error = err.message || 'Gagal memuat data mode santri.';
-      toast.error(error);
+      if (!data) {
+        error = err.message || 'Gagal memuat data mode santri.';
+        toast.error(error);
+      }
     } finally {
       loading = false;
     }

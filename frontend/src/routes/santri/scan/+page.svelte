@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { api } from '$lib/services/api';
   import { toast } from '$lib/stores/toast';
+  import { readCache, writeCache } from '$lib/utils/cache';
   import type { EventModel, SantriOverview, ScanResult } from '$lib/types';
   import {
     cameraErrorMessage,
@@ -63,7 +64,10 @@
   let currentCode = $state('');
   let lastScannedCode = '';
   let lastScannedAt = 0;
+  let autoCheckIn = $state(true);
   const DUPLICATE_SCAN_COOLDOWN_MS = 2500;
+  const OVERVIEW_CACHE_KEY = 'santri_overview';
+  const AUTO_CHECKIN_KEY = 'santri_auto_checkin';
 
   let event = $derived<EventModel | null>(overview?.event ?? null);
 
@@ -72,19 +76,49 @@
     else refreshing = true;
     loadError = '';
 
+    overview = readCache<SantriOverview>(OVERVIEW_CACHE_KEY, 10 * 60 * 1000);
+    if (overview) loading = false;
+
     try {
       const res = await api.getSantriOverview();
       overview = res.data;
+      writeCache(OVERVIEW_CACHE_KEY, res.data);
     } catch (err: any) {
-      loadError = err.message || 'Gagal memuat data scanner santri.';
-      toast.error(loadError);
+      if (!overview) {
+        loadError = err.message || 'Gagal memuat data scanner santri.';
+        toast.error(loadError);
+      }
     } finally {
       loading = false;
       refreshing = false;
     }
   }
 
-  onMount(() => loadData());
+  onMount(() => {
+    autoCheckIn = localStorage.getItem(AUTO_CHECKIN_KEY) !== '0';
+    void loadData();
+  });
+
+  function toggleAutoCheckIn() {
+    localStorage.setItem(AUTO_CHECKIN_KEY, autoCheckIn ? '1' : '0');
+  }
+
+  function applyLocalAttendance(already?: boolean) {
+    if (already || !overview) return;
+
+    const present = overview.stats.present + 1;
+    const total = overview.stats.total || 0;
+    overview = {
+      ...overview,
+      stats: {
+        ...overview.stats,
+        present,
+        absent: Math.max(0, overview.stats.absent - 1),
+        attendance_percentage: total ? Math.round((present / total) * 100) : 0
+      }
+    };
+    writeCache(OVERVIEW_CACHE_KEY, overview, 10 * 60 * 1000);
+  }
 
   function extractCode(text: string): string {
     const trimmed = text.trim();
@@ -229,6 +263,17 @@
     currentCode = code;
 
     try {
+      if (autoCheckIn) {
+        // Satu request untuk validasi + check-in. Ini menghemat request dan
+        // kuota internet dibanding alur validasi lalu konfirmasi terpisah.
+        const res = await api.checkInSantri(code);
+        result = res;
+        resultKind = res.already_checked_in ? 'already' : 'checked_in';
+        applyLocalAttendance(res.already_checked_in);
+        toast.success(res.already_checked_in ? 'Tamu sudah tercatat hadir.' : 'Kehadiran berhasil dicatat.');
+        return;
+      }
+
       const res = await api.validateSantriScan(code);
       result = res;
       resultKind = res.already_checked_in ? 'already' : 'valid';
@@ -293,7 +338,9 @@
       result = res;
       resultKind = res.already_checked_in ? 'already' : 'checked_in';
       toast.success(res.already_checked_in ? 'Tamu sudah tercatat hadir.' : 'Kehadiran berhasil dicatat.');
-      await loadData(false);
+
+      // Perbarui statistik lokal agar tidak perlu fetch overview lagi.
+      applyLocalAttendance(res.already_checked_in);
     } catch (err: any) {
       const payload = err.payload;
       resultKind = payload?.code === 'wrong_event' ? 'wrong_event' : 'error';
@@ -564,6 +611,19 @@
               </button>
             {/if}
           </div>
+
+          <label class="mt-3 flex items-start gap-2 text-xs leading-relaxed text-stone-500">
+            <input
+              type="checkbox"
+              class="mt-0.5 h-4 w-4 accent-[#d4af37]"
+              bind:checked={autoCheckIn}
+              onchange={toggleAutoCheckIn}
+            />
+            <span>
+              <span class="font-medium text-stone-300">Scan cepat (disarankan)</span> — langsung catat kehadiran dalam
+              <span class="text-[#d4af37]">1 request</span>. Matikan jika ingin melihat data tamu dulu sebelum konfirmasi.
+            </span>
+          </label>
 
           {#if manualMode}
             <form class="mt-4 space-y-2 rounded-xl border border-white/10 bg-black/20 p-3" onsubmit={submitManual}>

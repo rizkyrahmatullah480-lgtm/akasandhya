@@ -29,36 +29,20 @@ class SantriController extends Controller
 
     public function overview()
     {
-        $event = $this->defaultEvent();
-        $event->loadCount(['guests', 'attendance as attended_count']);
-
-        $recent = Attendance::query()
-            ->where('event_id', $event->id)
-            ->with([
-                'guest:id,event_id,name,category,wali_angkatan,santri_code,whatsapp_number',
-                'officer:id,name',
-            ])
-            ->latest('checked_in_at')
-            ->limit(8)
-            ->get();
-
         return response()->json([
             'success' => true,
-            'data' => [
-                'event' => $event,
-                'stats' => $this->stats($event),
-                'recent' => $recent,
-            ],
+            'data' => $this->overviewData(),
         ]);
     }
 
     public function index(Request $request)
     {
         $event = $this->defaultEvent();
+        $compact = $request->boolean('compact');
 
         $query = Guest::query()
             ->where('event_id', $event->id)
-            ->with(['invitation', 'attendance.officer:id,name']);
+            ->with($compact ? ['attendance'] : ['invitation', 'attendance.officer:id,name']);
 
         if ($search = trim((string) $request->query('search'))) {
             $query->where(function ($q) use ($search) {
@@ -88,6 +72,33 @@ class SantriController extends Controller
             }
         }
 
+        if ($compact) {
+            $guests = $guests->map(function (Guest $guest) {
+                $attendance = $guest->attendance;
+
+                return [
+                    'id' => $guest->id,
+                    'event_id' => $guest->event_id,
+                    'name' => $guest->name,
+                    'whatsapp_number' => $guest->whatsapp_number,
+                    'category' => $guest->category,
+                    'wali_angkatan' => $guest->wali_angkatan,
+                    'santri_code' => $guest->santri_code,
+                    'unique_token' => $guest->unique_token,
+                    'created_at' => $guest->created_at,
+                    'updated_at' => $guest->updated_at,
+                    'attendance' => $attendance ? [
+                        'id' => $attendance->id,
+                        'guest_id' => $attendance->guest_id,
+                        'event_id' => $attendance->event_id,
+                        'status' => $attendance->status,
+                        'checked_in_at' => $attendance->checked_in_at,
+                        'checked_in_by' => $attendance->checked_in_by,
+                    ] : null,
+                ];
+            })->values();
+        }
+
         return response()->json([
             'success' => true,
             'data' => $guests,
@@ -100,27 +111,15 @@ class SantriController extends Controller
     {
         $event = $this->defaultEvent();
         $data = $this->validatedGuestData($request);
-
-        $guest = DB::transaction(function () use ($event, $data) {
-            $guest = Guest::create([
-                'event_id' => $event->id,
-                'name' => $data['name'],
-                'whatsapp_number' => $this->invitations->normalizePhone($data['whatsapp_number']),
-                'category' => $data['tipe'],
-                'wali_angkatan' => $data['wali_angkatan'] ?? null,
-                'santri_code' => Guest::nextSantriCode($event->id, $data['tipe']),
-            ]);
-
-            $this->invitations->generateForGuest($guest);
-
-            return $guest;
-        });
+        $result = $this->createGuestRecord($event, $data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Tamu santri berhasil ditambahkan dan link undangan dibuat.',
-            'data' => $guest->load(['invitation', 'attendance']),
-        ], 201);
+            'message' => $result['created']
+                ? 'Tamu santri berhasil ditambahkan dan link undangan dibuat.'
+                : 'Tamu dengan permintaan ini sudah tersimpan.',
+            'data' => $result['guest']->load(['invitation', 'attendance']),
+        ], $result['created'] ? 201 : 200);
     }
 
     public function update(Request $request, Guest $guest)
@@ -274,7 +273,6 @@ class SantriController extends Controller
 
     public function checkIn(Request $request)
     {
-        $event = $this->defaultEvent();
         $raw = (string) ($request->input('code') ?? $request->input('token') ?? '');
 
         if (trim($raw) === '') {
@@ -285,6 +283,89 @@ class SantriController extends Controller
                 'message' => 'Kode atau QR Code tamu tidak boleh kosong.',
             ], 422);
         }
+
+        $result = $this->performCheckIn($request, $raw);
+
+        return $this->checkInResponse($result);
+    }
+
+    private function validatedGuestData(Request $request): array
+    {
+        return $this->validateGuestPayload($request->all());
+    }
+
+    private function validateGuestPayload(array $payload): array
+    {
+        if (isset($payload['whatsapp_number']) && is_string($payload['whatsapp_number'])) {
+            $payload['whatsapp_number'] = preg_replace('/[\s\-().]+/', '', $payload['whatsapp_number']);
+        }
+
+        $data = Validator::make($payload, [
+            'name' => ['required', 'string', 'max:255'],
+            'tipe' => ['required', 'in:Santri,Alumni'],
+            'wali_angkatan' => ['nullable', 'string', 'max:255'],
+            'whatsapp_number' => ['required', 'string', 'max:20', 'regex:/^(\+?62|0)8[1-9][0-9]{7,11}$/'],
+        ], [
+            'name.required' => 'Nama tamu wajib diisi.',
+            'tipe.required' => 'Pilih tipe tamu Santri atau Alumni.',
+            'tipe.in' => 'Tipe tamu harus Santri atau Alumni.',
+            'whatsapp_number.required' => 'Nomor HP/WhatsApp wajib diisi.',
+            'whatsapp_number.regex' => 'Format nomor HP tidak valid. Contoh: 081234567890.',
+        ])->validate();
+
+        $data['name'] = trim($data['name']);
+        $data['wali_angkatan'] = isset($data['wali_angkatan'])
+            ? trim((string) $data['wali_angkatan']) ?: null
+            : null;
+
+        return $data;
+    }
+
+    private function overviewData(): array
+    {
+        $event = $this->defaultEvent();
+        $event->loadCount(['guests', 'attendance as attended_count']);
+
+        $recent = Attendance::query()
+            ->where('event_id', $event->id)
+            ->with([
+                'guest:id,event_id,name,category,wali_angkatan,santri_code,whatsapp_number',
+                'officer:id,name',
+            ])
+            ->latest('checked_in_at')
+            ->limit(8)
+            ->get();
+
+        return [
+            'event' => $event,
+            'stats' => $this->stats($event),
+            'recent' => $recent,
+        ];
+    }
+
+    private function createGuestRecord(Event $event, array $data): array
+    {
+        $guest = DB::transaction(function () use ($event, $data) {
+            $guest = Guest::create([
+                'event_id' => $event->id,
+                'name' => $data['name'],
+                'whatsapp_number' => $this->invitations->normalizePhone($data['whatsapp_number']),
+                'category' => $data['tipe'],
+                'wali_angkatan' => $data['wali_angkatan'] ?? null,
+                'santri_code' => Guest::nextSantriCode($event->id, $data['tipe']),
+            ]);
+
+            $this->invitations->generateForGuest($guest);
+
+            return $guest;
+        });
+
+        return ['guest' => $guest, 'created' => true];
+    }
+
+    private function performCheckIn(Request $request, string $raw): array
+    {
+        $event = $this->defaultEvent();
 
         try {
             $result = DB::transaction(function () use ($request, $event, $raw) {
@@ -341,20 +422,21 @@ class SantriController extends Controller
                 ? Attendance::where('guest_id', $guest->id)->where('event_id', $event->id)->first()
                 : null;
 
-            return response()->json([
-                'success' => true,
-                'checked_in' => true,
-                'already_checked_in' => true,
+            return [
                 'code' => 'already_checked_in',
-                'message' => 'Tamu sudah tercatat hadir (check-in paralel terdeteksi).',
-                'data' => [
-                    'guest' => $guest,
-                    'event' => $event,
-                    'attendance' => $attendance?->load('officer:id,name'),
-                    'stats' => $this->stats($event),
-                ],
-            ]);
+                'guest' => $guest,
+                'attendance' => $attendance,
+            ];
         }
+
+        $result['event'] = $event;
+
+        return $result;
+    }
+
+    private function checkInResponse(array $result)
+    {
+        $event = $result['event'] ?? $this->defaultEvent();
 
         if ($result['code'] === 'invalid_token') {
             return response()->json([
@@ -362,6 +444,15 @@ class SantriController extends Controller
                 'checked_in' => false,
                 'code' => 'invalid_token',
                 'message' => 'Kode tidak ditemukan. Periksa kembali kode atau QR Code tamu.',
+            ], 404);
+        }
+
+        if (empty($result['guest'])) {
+            return response()->json([
+                'success' => false,
+                'checked_in' => false,
+                'code' => 'invalid_token',
+                'message' => 'Data tamu tidak ditemukan.',
             ], 404);
         }
 
@@ -395,35 +486,6 @@ class SantriController extends Controller
                 'stats' => $this->stats($event),
             ],
         ]);
-    }
-
-    private function validatedGuestData(Request $request): array
-    {
-        $payload = $request->all();
-
-        if (isset($payload['whatsapp_number']) && is_string($payload['whatsapp_number'])) {
-            $payload['whatsapp_number'] = preg_replace('/[\s\-().]+/', '', $payload['whatsapp_number']);
-        }
-
-        $data = Validator::make($payload, [
-            'name' => ['required', 'string', 'max:255'],
-            'tipe' => ['required', 'in:Santri,Alumni'],
-            'wali_angkatan' => ['nullable', 'string', 'max:255'],
-            'whatsapp_number' => ['required', 'string', 'max:20', 'regex:/^(\+?62|0)8[1-9][0-9]{7,11}$/'],
-        ], [
-            'name.required' => 'Nama tamu wajib diisi.',
-            'tipe.required' => 'Pilih tipe tamu Santri atau Alumni.',
-            'tipe.in' => 'Tipe tamu harus Santri atau Alumni.',
-            'whatsapp_number.required' => 'Nomor HP/WhatsApp wajib diisi.',
-            'whatsapp_number.regex' => 'Format nomor HP tidak valid. Contoh: 081234567890.',
-        ])->validate();
-
-        $data['name'] = trim($data['name']);
-        $data['wali_angkatan'] = isset($data['wali_angkatan'])
-            ? trim((string) $data['wali_angkatan']) ?: null
-            : null;
-
-        return $data;
     }
 
     private function defaultEvent(): Event

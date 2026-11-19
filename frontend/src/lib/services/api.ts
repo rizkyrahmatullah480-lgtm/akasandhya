@@ -121,11 +121,12 @@ class ApiService {
     return this.request<SantriOverview>('/santri/overview');
   }
 
-  async getSantriGuests(params?: { search?: string; tipe?: string; status?: string }) {
+  async getSantriGuests(params?: { search?: string; tipe?: string; status?: string; compact?: boolean }) {
     const query = new URLSearchParams();
     if (params?.search) query.set('search', params.search);
     if (params?.tipe) query.set('tipe', params.tipe);
     if (params?.status) query.set('status', params.status);
+    if (params?.compact) query.set('compact', '1');
     const qs = query.toString() ? `?${query.toString()}` : '';
     return this.request<Guest[]>(`/santri/guests${qs}`);
   }

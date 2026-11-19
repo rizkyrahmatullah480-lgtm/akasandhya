@@ -63,7 +63,9 @@
   let currentToken = $state('');
   let lastScannedToken = '';
   let lastScannedAt = 0;
+  let autoCheckIn = $state(true);
   const DUPLICATE_SCAN_COOLDOWN_MS = 2500;
+  const AUTO_CHECKIN_KEY = 'invitaku_admin_auto_checkin';
 
   let selectedEvent = $derived(events.find((event) => String(event.id) === selectedEventId) ?? null);
 
@@ -119,7 +121,14 @@
     }
   }
 
-  onMount(loadEvents);
+  onMount(() => {
+    autoCheckIn = localStorage.getItem(AUTO_CHECKIN_KEY) !== '0';
+    void loadEvents();
+  });
+
+  function toggleAutoCheckIn() {
+    localStorage.setItem(AUTO_CHECKIN_KEY, autoCheckIn ? '1' : '0');
+  }
 
   function extractToken(text: string): string {
     const trimmed = text.trim();
@@ -269,6 +278,15 @@
     currentToken = token;
 
     try {
+      if (autoCheckIn) {
+        // Satu request untuk validasi + check-in; tidak perlu loadEvents/loadAttendance.
+        const res = await api.checkIn(selectedEventId, token);
+        result = res;
+        resultKind = res.already_checked_in ? 'already' : 'checked_in';
+        toast.success(res.already_checked_in ? 'Tamu sudah tercatat hadir.' : 'Kehadiran berhasil dicatat.');
+        return;
+      }
+
       const res = await api.validateScan(selectedEventId, token);
       result = res;
       resultKind = res.already_checked_in ? 'already' : 'valid';
@@ -581,6 +599,19 @@
               </button>
             {/if}
           </div>
+
+          <label class="mt-3 flex items-start gap-2 text-xs leading-relaxed text-stone-500">
+            <input
+              type="checkbox"
+              class="mt-0.5 h-4 w-4 accent-[#d4af37]"
+              bind:checked={autoCheckIn}
+              onchange={toggleAutoCheckIn}
+            />
+            <span>
+              <span class="font-medium text-stone-300">Scan cepat (disarankan)</span> — langsung catat kehadiran dalam
+              <span class="text-[#d4af37]">1 request</span>. Matikan jika ingin konfirmasi manual dulu.
+            </span>
+          </label>
 
           {#if manualMode}
             <form class="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-2" onsubmit={submitManual}>

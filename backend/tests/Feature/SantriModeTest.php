@@ -48,6 +48,30 @@ class SantriModeTest extends ApiTestCase
             ->assertJsonPath('data.stats.total', 1);
     }
 
+    public function test_compact_guest_list_omits_unused_relations(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        $this->postJson('/api/santri/guests', [
+            'name' => 'Compact Guest',
+            'tipe' => 'Alumni',
+            'wali_angkatan' => '2024',
+            'whatsapp_number' => '081298761099',
+        ])->assertCreated();
+
+        $json = $this->getJson('/api/santri/guests?compact=1')
+            ->assertOk()
+            ->json();
+
+        $guest = $json['data'][0];
+
+        $this->assertArrayHasKey('unique_token', $guest);
+        $this->assertArrayHasKey('santri_code', $guest);
+        $this->assertArrayNotHasKey('invitation', $guest);
+        $this->assertArrayNotHasKey('event', $guest);
+        $this->assertArrayNotHasKey('officer', $guest['attendance'] ?? []);
+    }
+
     public function test_scanner_can_validate_and_check_in_using_the_short_santri_code(): void
     {
         $admin = $this->makeAdmin();

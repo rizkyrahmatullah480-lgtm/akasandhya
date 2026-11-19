@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { page } from '$app/state';
   import { api } from '$lib/services/api';
+  import { readCache, writeCache } from '$lib/utils/cache';
   import type { PublicInvitationData } from '$lib/types';
   import {
     Sparkles,
@@ -63,16 +64,22 @@
 
     loading = true;
     error = '';
-    data = null;
+
+    const cacheKey = `santri_invitation_${token}`;
+    data = readCache<PublicInvitationData>(cacheKey, 24 * 60 * 60 * 1000);
+    if (data) loading = false;
 
     try {
       const res = await api.getPublicInvitation(token);
       data = res.data;
+      writeCache(cacheKey, res.data);
     } catch (err: any) {
-      error =
-        err.status === 404
-          ? 'Undangan tidak ditemukan. Tautan mungkin salah, sudah kedaluwarsa, atau tamu telah dihapus.'
-          : err.message || 'Gagal memuat undangan. Periksa koneksi internet Anda.';
+      if (!data) {
+        error =
+          err.status === 404
+            ? 'Undangan tidak ditemukan. Tautan mungkin salah, sudah kedaluwarsa, atau tamu telah dihapus.'
+            : err.message || 'Gagal memuat undangan. Periksa koneksi internet Anda.';
+      }
     } finally {
       loading = false;
     }

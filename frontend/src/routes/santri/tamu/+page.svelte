@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { api } from '$lib/services/api';
   import { toast } from '$lib/stores/toast';
+  import { readCache, writeCache } from '$lib/utils/cache';
   import SantriQrModal from '$lib/components/SantriQrModal.svelte';
   import type { Guest } from '$lib/types';
   import {
@@ -30,6 +31,12 @@
   let toggling = $state<number | null>(null);
   let sending = $state<number | null>(null);
   let qrGuest = $state<Guest | null>(null);
+  let lastWa = $state<{ name: string; url: string } | null>(null);
+  let waCache = $state<Record<number, string>>({});
+  const GUESTS_CACHE_KEY = 'santri_guests';
+
+  // wa_url hanya dibuat saat tombol diklik. Tidak ada request saat hover,
+  // supaya kuota internet tidak terbuang untuk tombol yang tidak dipakai.
 
   let filtered = $derived.by(() => {
     const term = search.trim().toLowerCase();
@@ -62,11 +69,22 @@
     if (showSpinner) loading = true;
     else refreshing = true;
 
+    const cached = readCache<Guest[]>(GUESTS_CACHE_KEY, 5 * 60 * 1000);
+    if (cached) {
+      guests = cached;
+      if (showSpinner) loading = false;
+    }
+
     try {
-      const res = await api.getSantriGuests();
+      // compact=1 menghilangkan relasi invitation/officer yang tidak dipakai
+      // di halaman ini, sehingga response lebih kecil di internet lambat.
+      const res = await api.getSantriGuests({ compact: true });
       guests = res.data;
+      writeCache(GUESTS_CACHE_KEY, res.data, 5 * 60 * 1000);
     } catch (err: any) {
-      toast.error(err.message || 'Gagal memuat daftar tamu santri.');
+      if (!guests.length) {
+        toast.error(err.message || 'Gagal memuat daftar tamu santri.');
+      }
     } finally {
       loading = false;
       refreshing = false;
@@ -81,6 +99,8 @@
     return '';
   }
 
+
+
   async function copyLink(guest: Guest) {
     try {
       await navigator.clipboard.writeText(invitationUrl(guest));
@@ -91,13 +111,39 @@
   }
 
   async function sendWhatsApp(guest: Guest) {
+    const cached = waCache[guest.id];
+    if (cached) {
+      lastWa = { name: guest.name, url: cached };
+      window.open(cached, '_blank', 'noopener,noreferrer');
+      toast.success('WhatsApp dibuka. Tekan kirim di aplikasi WhatsApp.');
+      return;
+    }
+
     sending = guest.id;
+
+    // Buka tab kosong selagi masih dalam user gesture, supaya popup blocker
+    // tidak menolak window.open setelah await fetch selesai.
+    const pendingWin = window.open('about:blank', '_blank');
 
     try {
       const res = await api.sendWhatsApp(guest.id, { mode: 'click' });
 
       if (res.data.wa_url) {
-        window.open(res.data.wa_url, '_blank', 'noopener,noreferrer');
+        waCache[guest.id] = res.data.wa_url;
+        lastWa = { name: guest.name, url: res.data.wa_url };
+        let opened = false;
+        try {
+          if (pendingWin && !pendingWin.closed && pendingWin.location) {
+            pendingWin.location.href = res.data.wa_url;
+            pendingWin.opener = null;
+            opened = true;
+          }
+        } catch {
+          opened = false;
+        }
+        if (!opened) {
+          window.open(res.data.wa_url, '_blank', 'noopener,noreferrer');
+        }
       }
 
       if (res.data.invitation) {
@@ -108,6 +154,7 @@
 
       toast.success('WhatsApp dibuka. Tekan kirim di aplikasi WhatsApp.');
     } catch (err: any) {
+      pendingWin?.close();
       toast.error(err.message || 'Gagal menyiapkan pesan WhatsApp.');
     } finally {
       sending = null;
@@ -178,6 +225,32 @@
       </a>
     </div>
   </div>
+
+  {#if lastWa}
+    <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <p class="text-sm text-emerald-200 flex-1">
+        Pesan WhatsApp untuk <span class="font-semibold">{lastWa.name}</span> sudah disiapkan.
+        Popup diblokir browser? Klik tombol di samping.
+      </p>
+      <div class="flex items-center gap-2 shrink-0">
+        <a
+          href={lastWa.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-xl bg-[#d4af37] px-4 py-2 text-xs font-semibold text-[#080808] hover:brightness-110"
+        >
+          <MessageCircle class="w-4 h-4" /> Buka WhatsApp
+        </a>
+        <button
+          type="button"
+          class="rounded-xl border border-white/10 px-3 py-2 text-xs text-stone-400 hover:bg-white/5"
+          onclick={() => (lastWa = null)}
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  {/if}
 
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
     <div class="rounded-2xl border border-white/5 bg-[#0e0d0b] p-4">
